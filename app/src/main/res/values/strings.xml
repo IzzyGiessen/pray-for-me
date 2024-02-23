@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">PrayForMe</string>
+    <string name="pray">Pray</string>
+    <string name="skip">Skip</string>
+    <string name="prayers_received" formatted="true">%1$s prayers received</string>
+    <string name="start_prayer">\"In the name of the Father, the Son and the Holy Ghost…\"</string>
+    <string name="line_count" formatted="true">%1$s/15</string>
 </resources>

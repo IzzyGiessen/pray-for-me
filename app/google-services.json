@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "123447933948",
+    "project_id": "prayforme-7597f",
+    "storage_bucket": "prayforme-7597f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123447933948:android:a2dace4647cf28d17a5079",
+        "android_client_info": {
+          "package_name": "com.onlysaints.prayforme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "123447933948-rsch1538v4oe0vrefjbidjkbcpln34pr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.onlysaints.prayforme",
+            "certificate_hash": "61dee332fa6320a900665ecdc2e2e87ba9b60a39"
+          }
+        },
+        {
+          "client_id": "123447933948-ktu1vu2l4qpmvfq0u6kpm27m70k4npav.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwGngiDizuBmRy8rHRpiRStykQijD97Ik"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "123447933948-ktu1vu2l4qpmvfq0u6kpm27m70k4npav.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
