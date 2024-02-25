@@ -9,11 +9,11 @@
         <item name="colorSecondary">@color/silver</item>
         <item name="colorSecondaryVariant">@color/rosy_brown</item>
         <item name="colorOnSecondary">@color/dark_purple</item>
-
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
         <!-- Customize your theme here. -->
-        <item name="android:textViewStyle">@style/Widget.App.TextView</item>
+        <item name="android:textViewStyle">@style/Widget.App.TextView.Dark</item>
         <item name="android:imageButtonStyle">@style/Widget.App.ImageButton</item>
         <item name="materialButtonStyle">@style/Widget.App.Button</item>
         <item name="background_color">@color/eggplant</item>

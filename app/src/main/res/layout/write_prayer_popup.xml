@@ -3,6 +3,9 @@
     android:id="@+id/popup_margin"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clickable="true"
+    android:focusable="true"
+    android:translationZ="10dp"
     android:background="@color/dark_transparent_black"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -35,7 +38,6 @@
             android:hint="Write your prayer request..."
             android:background="@null"
             android:textCursorDrawable="@null"
-            android:focusable="true"
             android:inputType="textMultiLine"
             android:maxLines="15"
             app:layout_constraintTop_toTopOf="parent"

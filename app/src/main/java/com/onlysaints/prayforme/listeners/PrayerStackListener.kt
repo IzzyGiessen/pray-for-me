@@ -1,6 +1,5 @@
 package com.onlysaints.prayforme.listeners
 
-import android.animation.TimeInterpolator
 import android.content.res.Resources
 import android.view.MotionEvent
 import android.view.View
@@ -11,12 +10,15 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.firebase.database.DataSnapshot
-import com.google.firebase.firestore.DocumentSnapshot
 import com.onlysaints.prayforme.MainActivity
 import com.onlysaints.prayforme.R
+import org.w3c.dom.Text
+import java.lang.Exception
 
 class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     private var prayerId: String? = null
+    var prayerText: String? = null
+    var prayerCountText: String? = null
     private val cardMap = HashMap<ConstraintLayout, ConstraintLayout>()
 
     private val screenWidth = Resources.getSystem().displayMetrics.widthPixels
@@ -30,6 +32,8 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     private var dX = 0f
     private var dY = 0f
 
+    private var i = 0
+
     init {
         cardMap[act.prayerCard1] = act.prayerCard2
         cardMap[act.prayerCard2] = act.prayerCard1
@@ -41,11 +45,13 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     }
 
     private fun loadPrayer(view: View) {
+        val prayerTextView = view.findViewById<TextView>(R.id.prayer_text)
+        val prayerCountView = view.findViewById<TextView>(R.id.prayer_count)
         act.db.getPrayers({allPrayers ->
-            val prayerText = (view as ViewGroup).getChildAt(0) as TextView
             val prayers = allPrayers.children.toList()
             if (prayers.isEmpty()) {
-                prayerText.text = "No prayers left... Request your own!"
+                // TODO: store string elsewhere
+                prayerTextView.text = "No prayers left... Request your own!"
                 return@getPrayers
             }
             // pick prayer based on prayerCount and timestamp
@@ -54,16 +60,27 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
                 val tempPrayer = prayers.random()
                 prayer = prayer.comparePrayers(tempPrayer)
             }
-            prayerId = prayer.key!!
+            // TODO: check if this is our own prayer
+            prayerId = prayer.key
             act.db.getPrayerById(prayerId!!, {
-                prayerText.text = it["prayer"].toString()
-            })
-        })
+                prayerText = cardMap[view]!!.findViewById<TextView>(R.id.prayer_text).text.toString()
+                prayerCountText = cardMap[view]!!.findViewById<TextView>(R.id.prayer_count).text.toString()
+                prayerTextView.text = it["prayer_text"].toString()
+                prayerCountView.text = act.resources.getString(R.string.prayers_received,
+                    prayer.child("prayer_count").value.toString())
+            }, showPrayerLoadError(prayerTextView))
+        }, showPrayerLoadError(prayerTextView))
+    }
+
+    private fun showPrayerLoadError(prayerText: TextView): (Exception) -> Unit = {
+        it.printStackTrace()
+        // TODO: store string elsewhere and make page reloadable
+        prayerText.text = "Unable to load prayers. Please check your wifi connection and try again."
     }
 
     private fun DataSnapshot.comparePrayers(other: DataSnapshot): DataSnapshot {
         val now = System.currentTimeMillis()
-        fun DataSnapshot.prayedCount() = this.child("prayed_count").value as Long
+        fun DataSnapshot.prayedCount() = this.child("prayer_count").value as Long
         fun DataSnapshot.postedTime() = this.child("posted_time").value as Long
         fun DataSnapshot.score() = 1 / (now - postedTime()) * 1000 * 60 * prayedCount()
 
@@ -72,9 +89,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     }
 
     private fun swipeRight(view: View) {
-        val prayerText = (view as ViewGroup).getChildAt(0) as TextView
-        prayerText.text = "..."
-        loadPrayer(view)
+        swipeLeft(view)
         if (prayerId != null)
             act.db.incPrayerCount(prayerId!!)
 
@@ -95,7 +110,8 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     }
 
     private fun swipeLeft(view: View) {
-        val prayerText = (view as ViewGroup).getChildAt(0) as TextView
+        // TODO: set a timeout for requests so the dots do not remain
+        val prayerText = view.findViewById<TextView>(R.id.prayer_text)
         prayerText.text = "..."
         loadPrayer(view)
     }
