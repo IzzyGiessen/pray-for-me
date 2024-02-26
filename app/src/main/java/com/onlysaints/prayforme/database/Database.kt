@@ -6,12 +6,13 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.onlysaints.prayforme.classes.Prayer
 
 class Database {
     private val db = Firebase.firestore
     private val ref = Firebase.database.reference
 
-    fun addPrayer(prayer: Map<String, String>, onSuccess: (DocumentReference) -> Unit, onFailure: (Exception) -> Unit = {it.printStackTrace()}) {
+    fun addPrayer(prayer: Prayer, onSuccess: (DocumentReference) -> Unit, onFailure: (Exception) -> Unit = {it.printStackTrace()}) {
         db.collection("prayers")
             .add(prayer)
             .addOnSuccessListener(onSuccess)

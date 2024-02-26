@@ -22,10 +22,13 @@ import android.widget.ViewSwitcher
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SortedList
 import com.google.firebase.firestore.DocumentReference
+import com.onlysaints.prayforme.classes.Prayer
 import com.onlysaints.prayforme.database.Database
 import com.onlysaints.prayforme.database.LocalStorage
 import com.onlysaints.prayforme.listeners.ButtonTouchListener
+import java.util.SortedMap
 import java.util.logging.Logger
 
 class ProfileActivity : AppCompatActivity(), OnClickListener {
@@ -61,7 +64,7 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         profileLayout = findViewById(R.id.profile_layout)
 
         // initialize recyclerview
-        prayerAdapter = PrayerAdapter(this, arrayListOf(), this, o)
+        prayerAdapter = PrayerAdapter(this, mutableListOf(), this, o)
         prayerRecycler = findViewById(R.id.prayer_recycler)
         prayerRecycler.layoutManager = GridLayoutManager(this, 2)
         prayerRecycler.adapter = prayerAdapter
@@ -96,7 +99,6 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         prayerIds.forEach {id ->
             if (ls.has(id)) {
                 val prayer = ls.readPrayer(id) ?: return
-                prayer["prayer_count"] = "0"
                 db.getPrayerCount(id, o.addCountToPrayer(prayer)) {addPrayerToAdapter(prayer)}
             } else {
                 ls.removePrayerId(id)
@@ -104,10 +106,12 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         }
     }
 
-    fun addPrayerToAdapter(prayer: Map<String, String>) {
+    fun addPrayerToAdapter(prayer: Prayer) {
         prayerAdapter.addPrayer(prayer)
         // TODO: check if we can call this just once
         alternativeText.visibility = View.INVISIBLE
+        prayerRecycler.smoothScrollToPosition(0)
+        //prayerRecycler.scrollToPosition(0)
     }
 
     fun requestPrayers(v: View) {
@@ -128,21 +132,14 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
             // TODO: show popup/error
             return
         }
-        val prayer = hashMapOf(
-            "author" to "Anonymous",
-            "prayer_text" to prayerText
-        )
+        val prayer = Prayer(prayerText)
         db.addPrayer(prayer, ::savePrayerLocally)
     }
 
     private fun savePrayerLocally(doc: DocumentReference) {
         db.setPostTime(doc.id)
         db.incPrayerCount(doc.id)
-        val prayer = hashMapOf(
-            "prayer_text" to prayerEditText.text.toString(),
-            "prayer_count" to "0",
-            "prayer_id" to doc.id
-        )
+        val prayer = Prayer(prayerEditText.text.toString(), doc.id, 0, System.currentTimeMillis())
         ls.writePrayer(prayer)
         ls.addPrayerId(doc.id)
         prayerEditText.text.clear()

@@ -65,7 +65,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
             act.db.getPrayerById(prayerId!!, {
                 prayerText = cardMap[view]!!.findViewById<TextView>(R.id.prayer_text).text.toString()
                 prayerCountText = cardMap[view]!!.findViewById<TextView>(R.id.prayer_count).text.toString()
-                prayerTextView.text = it["prayer_text"].toString()
+                prayerTextView.text = it["text"].toString()
                 prayerCountView.text = act.resources.getString(R.string.prayers_received,
                     prayer.child("prayer_count").value.toString())
             }, showPrayerLoadError(prayerTextView))
@@ -80,7 +80,8 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
 
     private fun DataSnapshot.comparePrayers(other: DataSnapshot): DataSnapshot {
         val now = System.currentTimeMillis()
-        fun DataSnapshot.prayedCount() = this.child("prayer_count").value as Long
+
+        fun DataSnapshot.prayedCount() = this.child("prayer_count").value.let { if(it == null) 0 else it as Long }
         fun DataSnapshot.postedTime() = this.child("posted_time").value as Long
         fun DataSnapshot.score() = 1 / (now - postedTime()) * 1000 * 60 * prayedCount()
 

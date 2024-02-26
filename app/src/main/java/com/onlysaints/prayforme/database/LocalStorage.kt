@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
+import com.onlysaints.prayforme.classes.Prayer
 import java.io.EOFException
 import java.io.IOException
 import java.io.ObjectInputStream
@@ -24,11 +25,11 @@ class LocalStorage(private val context: Context) {
         }
     }
 
-    fun writePrayer(prayer: HashMap<String, String>) {
+    fun writePrayer(prayer: Prayer) {
         try {
              val oos = ObjectOutputStream(
                 context.openFileOutput(
-                    prayer["prayer_id"],
+                    prayer.id(),
                     Context.MODE_PRIVATE
                 )
             )
@@ -53,11 +54,11 @@ class LocalStorage(private val context: Context) {
         }
     }
 
-    fun readPrayer(filename: String): HashMap<String, String>? {
+    fun readPrayer(filename: String): Prayer? {
         return try {
             val fis = context.openFileInput(filename)
             val ois = ObjectInputStream(fis)
-            val prayer = ois.readObject() as HashMap<String, String>
+            val prayer = ois.readObject() as Prayer
             ois.close()
             fis.close()
             prayer

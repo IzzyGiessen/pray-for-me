@@ -12,10 +12,12 @@ import android.widget.TextView
 import android.widget.ViewSwitcher
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.onlysaints.prayforme.classes.Prayer
 import com.onlysaints.prayforme.database.Database
 import com.onlysaints.prayforme.listeners.ButtonTouchListener
+import java.util.SortedMap
 
-class PrayerAdapter(private val context: Context, private val prayers: MutableList<Map<String, String>>,
+class PrayerAdapter(private val context: Context, private val prayers: MutableList<Prayer>,
                     private val onClickListener: OnClickListener, private val profileOnFinish: ProfileOnFinish)
         : RecyclerView.Adapter<PrayerAdapter.ViewHolder>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -31,16 +33,21 @@ class PrayerAdapter(private val context: Context, private val prayers: MutableLi
         return prayers.size
     }
 
-    fun addPrayer(prayer: Map<String, String>) {
+    fun addPrayer(prayer: Prayer) {
         prayers.add(prayer)
-        notifyItemInserted(prayers.size-1)
+        prayers.sort()
+        val idx = prayers.indexOf(prayer)
+        println(idx)
+        println(itemCount)
+        notifyItemInserted(idx)
+        notifyItemRangeChanged(idx, itemCount-idx-1)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val prayer = prayers[position]
-        holder.prayerId = prayer["prayer_id"]
-        holder.prayerText.text = prayer["prayer_text"]
-        holder.prayCount.text = context.resources.getString(R.string.prayers_received, prayer["prayer_count"])
+        holder.prayerId = prayer.id()
+        holder.prayerText.text = prayer.text
+        holder.prayCount.text = context.resources.getString(R.string.prayers_received, prayer.count().toString())
     }
 
     fun createRemoveOnClick(viewHolder: ViewHolder): (v: View) -> Unit = {
