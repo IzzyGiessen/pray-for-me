@@ -29,8 +29,4 @@
         <item name="android:windowExitAnimation">@anim/popup_hide</item>
     </style>
 
-    <style name="backgroundImage">
-        <item name="android:tint">@color/transparent_black</item>
-    </style>
-
 </resources>

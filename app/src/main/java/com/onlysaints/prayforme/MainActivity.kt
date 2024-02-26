@@ -30,6 +30,9 @@ class MainActivity : AppCompatActivity() {
     lateinit var prayerText: TextView
     lateinit var prayCount: TextView
     lateinit var readPopupView: View
+    lateinit var leftSign: ConstraintLayout
+    lateinit var rightSign: ConstraintLayout
+    lateinit var openPrayerButton: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +42,9 @@ class MainActivity : AppCompatActivity() {
         darkCover = findViewById(R.id.dark_cover)
         prayerCard1 = findViewById(R.id.prayer_card_1)
         prayerCard2 = findViewById(R.id.prayer_card_2)
+        leftSign = findViewById(R.id.left_sign)
+        rightSign = findViewById(R.id.right_sign)
+        openPrayerButton = findViewById(R.id.open_prayer_button)
 
         val requestPrayersButton = findViewById<ImageView>(R.id.request_prayers_button)
         val openPrayerButton = findViewById<ImageButton>(R.id.open_prayer_button)

@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.view.animation.AccelerateInterpolator
+import android.view.animation.AlphaAnimation
+import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -14,6 +16,8 @@ import com.onlysaints.prayforme.MainActivity
 import com.onlysaints.prayforme.R
 import org.w3c.dom.Text
 import java.lang.Exception
+import java.lang.Float.max
+import java.lang.Float.min
 
 class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     private var prayerId: String? = null
@@ -25,7 +29,8 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     private var cardWidth: Int = 0
     private val scaleFactor = 0.9f
     private val scaleDuration = 100L
-    private val prayerTime = 7500L
+    private val prayerTime = 500L
+    private val minAlpha = 0.3f
 
     private var oX = 0f
     private var oY = 0f
@@ -42,6 +47,9 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
         }
         loadPrayer(act.prayerCard1)
         loadPrayer(act.prayerCard2)
+
+        act.prayerCard2.animate().rotation((-25..25).random().toFloat())
+            .setDuration(100).start()
     }
 
     private fun loadPrayer(view: View) {
@@ -91,8 +99,8 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
 
     private fun swipeRight(view: View) {
         swipeLeft(view)
-        if (prayerId != null)
-            act.db.incPrayerCount(prayerId!!)
+        prayerId?.let { act.db.incPrayerCount(it) }
+
 
         act.darkCover.isClickable = true
         act.darkCover.animate()
@@ -138,18 +146,27 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     }
 
     private fun onActionMove(view: View, event: MotionEvent): Boolean {
-        val animation: ViewPropertyAnimator = view.animate()
+        val direction = if (event.rawX + dX - oX > 0) 1 else -1
+        view.animate()
             .x(event.rawX + dX)
             .y(event.rawY + dY)
+            .rotation((event.rawX + dX - oX)/15)
             .setDuration(0)
-        animation.start()
+            .start()
+
+        val alpha = max(minAlpha, direction * (event.rawX + dX - oX)/(screenWidth/4))
+        val sign = if (direction == 1) act.rightSign else act.leftSign
+        sign.animate().alpha(alpha).setDuration(0).start()
         return true
     }
 
     private fun onActionUp(view: View): Boolean {
+        act.leftSign.animate().alpha(minAlpha).setDuration(100).start()
+        act.rightSign.animate().alpha(minAlpha).setDuration(100).start()
         view.animate()
             .scaleX(1f)
             .scaleY(1f)
+            .rotation(0f)
             .setDuration(scaleDuration)
             .start()
         view.setOnTouchListener(null)
@@ -168,6 +185,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
         view.animate()
             .x(x)
             .setDuration(100)
+            .rotation((-25..25).random().toFloat())
             .alpha(0f)
             .withEndAction{
                 if (isLeft) swipeLeft(view) else swipeRight(view)
@@ -182,8 +200,21 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
         view.z = 0f
         view.alpha = 1f
         val nextCard = cardMap[view]!!
-        nextCard.z = 10f
+        nextCard.z = 5f
+        nextCard.animate()
+            .setDuration(100)
+            .rotation(0f)
+            .start()
         nextCard.setOnTouchListener(this)
+        with (act.openPrayerButton) {
+            (parent as ConstraintLayout).removeView(this)
+            nextCard.addView(this)
+            animate().scaleY(0f).scaleX(0f).setDuration(0).start()
+            animate().scaleY(1f).scaleX(1f).setDuration(100).start()
+        }
+        val a = act.openPrayerButton.parent as ConstraintLayout
+        a.removeView(act.openPrayerButton)
+        nextCard.addView(act.openPrayerButton)
     }
 
     private fun toOrigin(view: View, duration: Long = 0) {

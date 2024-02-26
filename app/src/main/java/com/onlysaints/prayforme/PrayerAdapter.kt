@@ -1,7 +1,6 @@
 package com.onlysaints.prayforme
 
 import android.content.Context
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
@@ -15,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.onlysaints.prayforme.classes.Prayer
 import com.onlysaints.prayforme.database.Database
 import com.onlysaints.prayforme.listeners.ButtonTouchListener
-import java.util.SortedMap
 
 class PrayerAdapter(private val context: Context, private val prayers: MutableList<Prayer>,
                     private val onClickListener: OnClickListener, private val profileOnFinish: ProfileOnFinish)
@@ -37,8 +35,6 @@ class PrayerAdapter(private val context: Context, private val prayers: MutableLi
         prayers.add(prayer)
         prayers.sort()
         val idx = prayers.indexOf(prayer)
-        println(idx)
-        println(itemCount)
         notifyItemInserted(idx)
         notifyItemRangeChanged(idx, itemCount-idx-1)
     }

@@ -45,6 +45,7 @@ class Database {
     }
 
     fun incPrayerCount(id: String) {
+        println(id)
         getPrayerCount(id, {
             val prayerCount = if(it.value == null) 0 else it.value as Long + 1
             ref.child("prayers").child(id).child("prayer_count").setValue(prayerCount)
