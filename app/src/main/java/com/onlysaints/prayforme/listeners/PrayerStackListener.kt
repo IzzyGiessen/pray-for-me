@@ -48,7 +48,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
         loadPrayer(act.prayerCard1)
         loadPrayer(act.prayerCard2)
 
-        act.prayerCard2.animate().rotation((-25..25).random().toFloat())
+        act.prayerCard2.animate().rotation((-15..15).random().toFloat())
             .setDuration(100).start()
     }
 
@@ -185,7 +185,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
         view.animate()
             .x(x)
             .setDuration(100)
-            .rotation((-25..25).random().toFloat())
+            .rotation((-15..15).random().toFloat())
             .alpha(0f)
             .withEndAction{
                 if (isLeft) swipeLeft(view) else swipeRight(view)
@@ -197,10 +197,11 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     private fun switchCards(view: View) {
         view.setOnTouchListener(null)
         toOrigin(view)
-        view.z = 0f
-        view.alpha = 1f
         val nextCard = cardMap[view]!!
-        nextCard.z = 5f
+        val tmp = nextCard.z
+        nextCard.z = view.z
+        view.z = tmp
+        view.alpha = 1f
         nextCard.animate()
             .setDuration(100)
             .rotation(0f)
