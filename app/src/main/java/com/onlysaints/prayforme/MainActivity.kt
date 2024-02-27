@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var readPopupView: View
     lateinit var leftSign: ConstraintLayout
     lateinit var rightSign: ConstraintLayout
-    lateinit var openPrayerButton: ImageButton
+    lateinit var openPrayerButton: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +47,6 @@ class MainActivity : AppCompatActivity() {
         openPrayerButton = findViewById(R.id.open_prayer_button)
 
         val requestPrayersButton = findViewById<ImageView>(R.id.request_prayers_button)
-        val openPrayerButton = findViewById<ImageButton>(R.id.open_prayer_button)
 
         // set onTouchListeners
         prayerStackListener = PrayerStackListener(this)

@@ -25,12 +25,14 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     var prayerCountText: String? = null
     private val cardMap = HashMap<ConstraintLayout, ConstraintLayout>()
 
+    // TODO: consider making static variables
     private val screenWidth = Resources.getSystem().displayMetrics.widthPixels
     private var cardWidth: Int = 0
     private val scaleFactor = 0.9f
     private val scaleDuration = 100L
     private val prayerTime = 500L
     private val minAlpha = 0.3f
+    private val backCardRotation = 5
 
     private var oX = 0f
     private var oY = 0f
@@ -48,7 +50,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
         loadPrayer(act.prayerCard1)
         loadPrayer(act.prayerCard2)
 
-        act.prayerCard2.animate().rotation((-15..15).random().toFloat())
+        act.prayerCard2.animate().rotation((-backCardRotation..backCardRotation).random().toFloat())
             .setDuration(100).start()
     }
 
@@ -185,7 +187,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
         view.animate()
             .x(x)
             .setDuration(100)
-            .rotation((-15..15).random().toFloat())
+            .rotation((-backCardRotation..backCardRotation).random().toFloat())
             .alpha(0f)
             .withEndAction{
                 if (isLeft) swipeLeft(view) else swipeRight(view)
