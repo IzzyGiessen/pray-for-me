@@ -1,6 +1,7 @@
 package com.onlysaints.prayforme.listeners
 
 import android.content.res.Resources
+import android.opengl.Visibility
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +10,10 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.AlphaAnimation
 import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import com.google.firebase.database.DataSnapshot
 import com.onlysaints.prayforme.MainActivity
 import com.onlysaints.prayforme.R
@@ -33,6 +36,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     private val prayerTime = 500L
     private val minAlpha = 0.3f
     private val backCardRotation = 5
+    private val rotationDuration = 500L
 
     private var oX = 0f
     private var oY = 0f
@@ -51,10 +55,13 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
         loadPrayer(act.prayerCard2)
 
         act.prayerCard2.animate().rotation((-backCardRotation..backCardRotation).random().toFloat())
-            .setDuration(100).start()
+            .setDuration(rotationDuration).start()
     }
 
     private fun loadPrayer(view: View) {
+        // TODO: clean up method
+        val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar)
+        progressBar.visibility = View.VISIBLE
         val prayerTextView = view.findViewById<TextView>(R.id.prayer_text)
         val prayerCountView = view.findViewById<TextView>(R.id.prayer_count)
         act.db.getPrayers({allPrayers ->
@@ -76,6 +83,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
                 prayerText = cardMap[view]!!.findViewById<TextView>(R.id.prayer_text).text.toString()
                 prayerCountText = cardMap[view]!!.findViewById<TextView>(R.id.prayer_count).text.toString()
                 prayerTextView.text = it["text"].toString()
+                progressBar.visibility = View.GONE
                 prayerCountView.text = act.resources.getString(R.string.prayers_received,
                     prayer.child("prayer_count").value.toString())
             }, showPrayerLoadError(prayerTextView))
@@ -123,7 +131,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
     private fun swipeLeft(view: View) {
         // TODO: set a timeout for requests so the dots do not remain
         val prayerText = view.findViewById<TextView>(R.id.prayer_text)
-        prayerText.text = "..."
+        prayerText.text = ""
         loadPrayer(view)
     }
 
@@ -187,7 +195,6 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
         view.animate()
             .x(x)
             .setDuration(100)
-            .rotation((-backCardRotation..backCardRotation).random().toFloat())
             .alpha(0f)
             .withEndAction{
                 if (isLeft) swipeLeft(view) else swipeRight(view)
@@ -204,20 +211,23 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
         nextCard.z = view.z
         view.z = tmp
         view.alpha = 1f
+        view.animate().rotation((-backCardRotation..backCardRotation).random().toFloat())
+            .setDuration(rotationDuration).start()
         nextCard.animate()
             .setDuration(100)
             .rotation(0f)
             .start()
         nextCard.setOnTouchListener(this)
-        with (act.openPrayerButton) {
+        with (act.savePrayerButton) {
             (parent as ConstraintLayout).removeView(this)
             nextCard.addView(this)
             animate().scaleY(0f).scaleX(0f).setDuration(0).start()
             animate().scaleY(1f).scaleX(1f).setDuration(100).start()
+            this.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.empty_heart, null))
+            val parent = this.parent as ConstraintLayout
+            parent.removeView(this)
+            nextCard.addView(this)
         }
-        val a = act.openPrayerButton.parent as ConstraintLayout
-        a.removeView(act.openPrayerButton)
-        nextCard.addView(act.openPrayerButton)
     }
 
     private fun toOrigin(view: View, duration: Long = 0) {
