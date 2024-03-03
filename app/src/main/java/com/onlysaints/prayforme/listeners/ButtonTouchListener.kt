@@ -5,7 +5,7 @@ import android.os.Looper
 import android.view.MotionEvent
 import android.view.View
 
-class ButtonTouchListener : View.OnTouchListener {
+class ButtonTouchListener(val clickInstant: Boolean = false) : View.OnTouchListener {
     val scaleFactor = 1.2f
     val duration = 50L
     val longClickDuration = 400L
@@ -13,14 +13,6 @@ class ButtonTouchListener : View.OnTouchListener {
 
     override fun onTouch(view: View, event: MotionEvent): Boolean = when(event.action) {
         MotionEvent.ACTION_DOWN -> {
-            holding = true
-            view.isClickable = false
-            Handler(Looper.getMainLooper()).postDelayed(
-                {if(holding) {
-                    holding = false
-                    view.performLongClick()
-                }
-            }, longClickDuration)
             view.animate()
                 .scaleX(scaleFactor)
                 .scaleY(scaleFactor)
@@ -33,10 +25,22 @@ class ButtonTouchListener : View.OnTouchListener {
                         .start()
                 }
                 .start()
+            if (clickInstant) {
+                view.performClick()
+            } else {
+                holding = true
+                Handler(Looper.getMainLooper()).postDelayed(
+                    {
+                        if (holding) {
+                            holding = false
+                            view.performLongClick()
+                        }
+                    }, longClickDuration
+                )
+            }
             true
         }
         MotionEvent.ACTION_UP -> {
-            view.isClickable = true
             if (holding) view.performClick()
             holding = false
             true

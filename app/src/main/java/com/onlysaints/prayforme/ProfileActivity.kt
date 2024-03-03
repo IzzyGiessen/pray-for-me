@@ -1,7 +1,7 @@
 package com.onlysaints.prayforme
 
-import android.annotation.SuppressLint
 import android.app.ActionBar.LayoutParams
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -9,15 +9,19 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.method.ScrollingMovementMethod
 import android.view.Gravity
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.View.OnLongClickListener
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.PopupWindow
+import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import android.widget.ViewSwitcher
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
@@ -60,6 +64,7 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
 
         // initialize views
         val backButton = findViewById<ImageButton>(R.id.back_button)
+        val requestPrayersButton = findViewById<ImageButton>(R.id.request_prayers_button)
         alternativeText = findViewById(R.id.alternative_text)
         profileLayout = findViewById(R.id.profile_layout)
 
@@ -73,6 +78,7 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         // initialize write popup
         writePopupView = layoutInflater.inflate(R.layout.write_prayer_popup, profileLayout, false)
         lineCount = writePopupView.findViewById(R.id.line_count)
+        // TODO: is this needed?
         lineCount.text = resources.getString(R.string.line_count, "0")
         prayerEditText = writePopupView.findViewById(R.id.prayer_text)
         prayerEditText.addTextChangedListener(WritePrayerWatcher())
@@ -91,6 +97,8 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
 
         // set onTouchListeners
         backButton.setOnTouchListener(ButtonTouchListener())
+        requestPrayersButton.setOnTouchListener(ButtonTouchListener())
+        writePopupView.findViewById<ImageButton>(R.id.request_prayer_button).setOnTouchListener(ButtonTouchListener())
     }
 
     private fun loadPrayers() {
@@ -124,16 +132,34 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         profileLayout.removeView(v)
         val anim = AnimationUtils.loadAnimation(this, R.anim.popup_show)
         v.startAnimation(anim)
+        this.currentFocus?.let { view ->
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm?.hideSoftInputFromWindow(view.windowToken, 0)
+        }
     }
 
     fun uploadRequest(v: View) {
         val prayerText = prayerEditText.text.toString()
-        if (prayerText.trim().isEmpty() || prayerText.lines().size > 15) {
-            // TODO: show popup/error
+        if (prayerText.trim().isEmpty()) {
+            val toast = Toast(this)
+            toast.setText("You can not submit empty prayers.")
+            toast.duration = Toast.LENGTH_SHORT
+            toast.show()
+            return
+        }
+        if (prayerText.count() > 500) {
+            val toast = Toast(this)
+            toast.setText("Please keep your prayer length below 15 lines.")
+            toast.duration = Toast.LENGTH_SHORT
+            toast.show()
             return
         }
         val prayer = Prayer(prayerText)
         db.addPrayer(prayer, ::savePrayerLocally)
+    }
+
+    fun closeRequest(v: View) {
+        removePopupView(writePopupView)
     }
 
     private fun savePrayerLocally(doc: DocumentReference) {
@@ -153,7 +179,9 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
 
     // onClick method for prayers in Profile to show full prayer
     override fun onClick(v: View) {
+        prayerText.verticalScrollbarPosition = 0
         prayerText.text = v.findViewById<TextView>(R.id.prayer_text).text
+        prayerText.movementMethod = ScrollingMovementMethod()
         prayCount.text = v.findViewById<TextView>(R.id.pray_count).text
         readPopupWindow.showAtLocation(profileLayout, Gravity.CENTER, 0, 0)
     }
@@ -182,7 +210,11 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         }
 
         override fun onTextChanged(text: CharSequence, p1: Int, p2: Int, p3: Int) {
-            lineCount.text = resources.getString(R.string.line_count, text.lines().size.toString())
+            val chars = text.count()
+            lineCount.text = resources.getString(R.string.line_count, chars.toString())
+            if (chars > 500) {
+                lineCount.setTextColor(resources.getColor(R.color.fairy_tale, null))
+            }
         }
 
         override fun afterTextChanged(p0: Editable?) {

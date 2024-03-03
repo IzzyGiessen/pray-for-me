@@ -3,6 +3,7 @@ package com.onlysaints.prayforme
 import android.app.ActionBar
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.view.Gravity
@@ -11,6 +12,7 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupWindow
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -62,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         // set onTouchListeners
         prayerStackListener = PrayerStackListener(this)
         requestPrayersButton.setOnTouchListener(ButtonTouchListener())
-        savePrayerButton.setOnTouchListener(ButtonTouchListener())
+        savePrayerButton.setOnTouchListener(ButtonTouchListener(true))
         // only needs to be initialized for one card, because the listener switches
         prayerCard1.setOnTouchListener(prayerStackListener)
 
@@ -88,6 +90,14 @@ class MainActivity : AppCompatActivity() {
     fun requestPrayers(v: View) {
         intent = Intent(this, ProfileActivity::class.java)
         startActivity(intent)
-    }
+        // use Build.VERSION.RELEASE voor rooted and rommed devices according to StackOverflow
+        val inAnim = androidx.appcompat.R.anim.abc_grow_fade_in_from_bottom
+        val outAnim = androidx.appcompat.R.anim.abc_fade_out
 
+        if (Build.VERSION.SDK_INT > 34)
+            overrideActivityTransition(androidx.appcompat.R.anim.abc_fade_in,
+                inAnim, outAnim, 0)
+        else
+            overridePendingTransition(inAnim, outAnim)
+    }
 }
