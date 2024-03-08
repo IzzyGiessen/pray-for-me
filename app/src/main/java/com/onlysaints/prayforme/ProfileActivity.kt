@@ -2,11 +2,14 @@ package com.onlysaints.prayforme
 
 import android.app.ActionBar.LayoutParams
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.method.ScrollingMovementMethod
@@ -23,6 +26,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.ViewSwitcher
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -61,24 +65,27 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         setContentView(R.layout.activity_profile)
 
         o = ProfileOnFinish(this)
+        alternativeText = findViewById(R.id.alternative_text)
+
+        prayerAdapter = PrayerAdapter(this, MainActivity.prayerList, this, o)
+        if (prayerAdapter.prayers.isEmpty())
+            loadPrayers()
+        else
+            alternativeText.visibility = View.INVISIBLE
 
         // initialize views
         val backButton = findViewById<ImageButton>(R.id.back_button)
         val requestPrayersButton = findViewById<ImageButton>(R.id.request_prayers_button)
-        alternativeText = findViewById(R.id.alternative_text)
         profileLayout = findViewById(R.id.profile_layout)
 
         // initialize recyclerview
-        prayerAdapter = PrayerAdapter(this, mutableListOf(), this, o)
         prayerRecycler = findViewById(R.id.prayer_recycler)
         prayerRecycler.layoutManager = GridLayoutManager(this, 2)
         prayerRecycler.adapter = prayerAdapter
-        loadPrayers()
 
         // initialize write popup
         writePopupView = layoutInflater.inflate(R.layout.write_prayer_popup, profileLayout, false)
         lineCount = writePopupView.findViewById(R.id.line_count)
-        // TODO: is this needed?
         lineCount.text = resources.getString(R.string.line_count, "0")
         prayerEditText = writePopupView.findViewById(R.id.prayer_text)
         prayerEditText.addTextChangedListener(WritePrayerWatcher())
@@ -108,6 +115,7 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
             if (ls.has(id)) {
                 val prayer = ls.readPrayer(id) ?: return
                 db.getPrayerCount(id, o.addCountToPrayer(prayer)) {addPrayerToAdapter(prayer)}
+                alternativeText.visibility = View.INVISIBLE
             } else {
                 ls.removePrayerId(id)
             }
@@ -116,10 +124,7 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
 
     fun addPrayerToAdapter(prayer: Prayer) {
         prayerAdapter.addPrayer(prayer)
-        // TODO: check if we can call this just once
-        alternativeText.visibility = View.INVISIBLE
         prayerRecycler.smoothScrollToPosition(0)
-        //prayerRecycler.scrollToPosition(0)
     }
 
     fun requestPrayers(v: View) {
@@ -162,6 +167,10 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         removePopupView(writePopupView)
     }
 
+    fun closePrayer(v: View) {
+        readPopupWindow.dismiss()
+    }
+
     private fun savePrayerLocally(doc: DocumentReference) {
         db.setPostTime(doc.id)
         db.incPrayerCount(doc.id)
@@ -174,6 +183,7 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
     }
 
     fun exit(v: View) {
+        //startActivity(Intent(this, MainActivity::class.java))
         finish()
     }
 

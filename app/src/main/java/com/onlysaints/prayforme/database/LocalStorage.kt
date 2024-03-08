@@ -59,7 +59,6 @@ class LocalStorage(private val context: Context) {
             val fis = context.openFileInput(filename)
             val ois = ObjectInputStream(fis)
             val prayer = ois.readObject() as Prayer
-            println(prayer.text)
             ois.close()
             fis.close()
             prayer

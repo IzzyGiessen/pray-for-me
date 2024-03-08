@@ -17,6 +17,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
+import com.onlysaints.prayforme.classes.Prayer
 import com.onlysaints.prayforme.database.Database
 import com.onlysaints.prayforme.listeners.ButtonTouchListener
 import com.onlysaints.prayforme.listeners.PrayerStackListener
@@ -63,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
         // set onTouchListeners
         prayerStackListener = PrayerStackListener(this)
-        requestPrayersButton.setOnTouchListener(ButtonTouchListener())
+        requestPrayersButton.setOnTouchListener(ButtonTouchListener(true))
         savePrayerButton.setOnTouchListener(ButtonTouchListener(true))
         // only needs to be initialized for one card, because the listener switches
         prayerCard1.setOnTouchListener(prayerStackListener)
@@ -88,8 +89,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun requestPrayers(v: View) {
-        intent = Intent(this, ProfileActivity::class.java)
-        startActivity(intent)
         // use Build.VERSION.RELEASE voor rooted and rommed devices according to StackOverflow
         val inAnim = androidx.appcompat.R.anim.abc_grow_fade_in_from_bottom
         val outAnim = androidx.appcompat.R.anim.abc_fade_out
@@ -99,5 +98,11 @@ class MainActivity : AppCompatActivity() {
                 inAnim, outAnim, 0)
         else
             overridePendingTransition(inAnim, outAnim)
+        intent = Intent(this, ProfileActivity::class.java)
+        startActivity(intent)
+    }
+
+    companion object {
+        var prayerList: ArrayList<Prayer> = ArrayList()
     }
 }

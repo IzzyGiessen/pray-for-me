@@ -1,6 +1,8 @@
 package com.onlysaints.prayforme
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
@@ -14,8 +16,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.onlysaints.prayforme.classes.Prayer
 import com.onlysaints.prayforme.database.Database
 import com.onlysaints.prayforme.listeners.ButtonTouchListener
+import java.io.Serializable
 
-class PrayerAdapter(private val context: Context, private val prayers: MutableList<Prayer>,
+class PrayerAdapter(private val context: Context, val prayers: ArrayList<Prayer>,
                     private val onClickListener: OnClickListener, private val profileOnFinish: ProfileOnFinish)
         : RecyclerView.Adapter<PrayerAdapter.ViewHolder>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -87,5 +90,4 @@ class PrayerAdapter(private val context: Context, private val prayers: MutableLi
             db.removePrayer(prayerId!!, {})
         }
     }
-
 }

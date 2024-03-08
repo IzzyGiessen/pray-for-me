@@ -4,5 +4,5 @@
     <string name="skip">Skip</string>
     <string name="prayers_received" formatted="true">%1$s prayers</string>
     <string name="start_prayer">\"In the name of the Father, the Son and the Holy Ghost…\"</string>
-    <string name="line_count" formatted="true">%1$s/15</string>
+    <string name="line_count" formatted="true">%1$s/500</string>
 </resources>
