@@ -22,22 +22,24 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">
 
-        <ImageButton
+        <com.onlysaints.prayforme.views.TouchImageButton
             android:id="@+id/request_prayer_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/check_icon"
+            app:click_type="PRE_ANIM"
             android:layout_margin="10dp"
-            android:onClick="uploadRequest"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
 
-        <ImageButton
+        <com.onlysaints.prayforme.views.TouchImageButton
             android:id="@+id/exit_button"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/back_icon"
+            android:backgroundTint="@color/black"
             android:layout_margin="10dp"
+            app:click_type="POST_ANIM"
             android:onClick="closeRequest"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent" />

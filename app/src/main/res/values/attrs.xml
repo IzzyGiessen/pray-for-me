@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="TouchImageButton">
+        <attr name="click_type" format="enum">
+            <enum name="HOLD" value="0" />
+            <enum name="PRE_ANIM" value="1" />
+            <enum name="POST_ANIM" value="2" />
+        </attr>
+    </declare-styleable>
+
+</resources>

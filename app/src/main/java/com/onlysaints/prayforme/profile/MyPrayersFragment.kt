@@ -1,54 +1,47 @@
-package com.onlysaints.prayforme
+package com.onlysaints.prayforme.profile
 
-import android.app.ActionBar.LayoutParams
+import android.annotation.SuppressLint
+import android.app.ActionBar
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.method.ScrollingMovementMethod
 import android.view.Gravity
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
-import android.view.View.OnLongClickListener
+import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.PopupWindow
-import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
-import android.widget.ViewSwitcher
-import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SortedList
 import com.google.firebase.firestore.DocumentReference
+import com.onlysaints.prayforme.MainActivity
+import com.onlysaints.prayforme.R
 import com.onlysaints.prayforme.classes.Prayer
 import com.onlysaints.prayforme.database.Database
 import com.onlysaints.prayforme.database.LocalStorage
-import com.onlysaints.prayforme.listeners.ButtonTouchListener
-import java.util.SortedMap
-import java.util.logging.Logger
 
-class ProfileActivity : AppCompatActivity(), OnClickListener {
+class MyPrayersFragment : Fragment(), OnClickListener {
+    val o = ProfileOnFinish(this)
     val db = Database()
-    val ls = LocalStorage(this)
-    private lateinit var o: ProfileOnFinish
+    lateinit var ls: LocalStorage
 
     private lateinit var writePopupView: View
     private lateinit var readPopupWindow: PopupWindow
 
     // popup views
-    lateinit var profileLayout: ConstraintLayout
     private lateinit var lineCount: TextView
     private lateinit var prayerEditText: EditText
     private lateinit var prayerText: TextView
@@ -60,31 +53,41 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
     lateinit var prayerRecycler: RecyclerView
     lateinit var alternativeText: TextView
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_profile)
+    }
 
-        o = ProfileOnFinish(this)
-        alternativeText = findViewById(R.id.alternative_text)
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        val view: View = inflater.inflate(R.layout.fragment_my_prayers, container, false)
+        alternativeText = view.findViewById(R.id.alternative_text)
+        ls = LocalStorage(requireContext())
 
-        prayerAdapter = PrayerAdapter(this, MainActivity.prayerList, this, o)
+        prayerAdapter = PrayerAdapter(requireContext(), MainActivity.prayerList, this, o)
         if (prayerAdapter.prayers.isEmpty())
             loadPrayers()
         else
             alternativeText.visibility = View.INVISIBLE
 
         // initialize views
-        val backButton = findViewById<ImageButton>(R.id.back_button)
-        val requestPrayersButton = findViewById<ImageButton>(R.id.request_prayers_button)
-        profileLayout = findViewById(R.id.profile_layout)
+        val requestPrayersButton = view.findViewById<ImageButton>(R.id.request_prayers_button)
 
         // initialize recyclerview
-        prayerRecycler = findViewById(R.id.prayer_recycler)
-        prayerRecycler.layoutManager = GridLayoutManager(this, 2)
+        prayerRecycler = view.findViewById(R.id.prayer_recycler)
+        prayerRecycler.layoutManager = GridLayoutManager(requireContext(), 2)
         prayerRecycler.adapter = prayerAdapter
 
         // initialize write popup
-        writePopupView = layoutInflater.inflate(R.layout.write_prayer_popup, profileLayout, false)
+        writePopupView = layoutInflater.inflate(R.layout.write_prayer_popup, (requireActivity() as ProfileActivity).profileLayout, false)
+        val closePopupButton = writePopupView.findViewById<ImageButton>(R.id.exit_button)
+        closePopupButton.setOnClickListener(::closeRequest)
+        val uploadRequestButton = writePopupView.findViewById<ImageButton>(R.id.request_prayer_button)
+        uploadRequestButton.setOnClickListener(::uploadRequest)
         lineCount = writePopupView.findViewById(R.id.line_count)
         lineCount.text = resources.getString(R.string.line_count, "0")
         prayerEditText = writePopupView.findViewById(R.id.prayer_text)
@@ -93,19 +96,22 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         writePopupMargin.setOnClickListener{ removePopupView(writePopupView) }
 
         // initialize read popup
-        val readPopupView = layoutInflater.inflate(R.layout.view_prayer_popup, profileLayout, false)
+        val readPopupView = layoutInflater.inflate(R.layout.view_prayer_popup, (requireActivity() as ProfileActivity).profileLayout, false)
+        val closePrayerButton = readPopupView.findViewById<ImageButton>(R.id.exit_button)
+        closePrayerButton.setOnClickListener(::closePrayer)
+        val savePrayerButton = readPopupView.findViewById<ImageButton>(R.id.save_prayer_button)
+        savePrayerButton.setOnClickListener(::savePrayer)
         prayerText = readPopupView.findViewById(R.id.prayer_text)
         prayCount = readPopupView.findViewById(R.id.pray_count)
         prayerCard = readPopupView.findViewById(R.id.prayer_card)
         val readPopupMargin = readPopupView.findViewById<ConstraintLayout>(R.id.popup_margin)
         readPopupMargin.setOnClickListener{ readPopupWindow.dismiss() }
-        readPopupWindow = PopupWindow(readPopupView, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, true)
+        readPopupWindow = PopupWindow(readPopupView, ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT, true)
         readPopupWindow.animationStyle = R.style.popupAnimation
 
-        // set onTouchListeners
-        backButton.setOnTouchListener(ButtonTouchListener())
-        requestPrayersButton.setOnTouchListener(ButtonTouchListener())
-        writePopupView.findViewById<ImageButton>(R.id.request_prayer_button).setOnTouchListener(ButtonTouchListener())
+        // set onClickListeners
+        requestPrayersButton.setOnClickListener(::requestPrayers)
+        return view
     }
 
     private fun loadPrayers() {
@@ -128,17 +134,17 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
     }
 
     fun requestPrayers(v: View) {
-        profileLayout.addView(writePopupView, 4)
-        val anim = AnimationUtils.loadAnimation(this, R.anim.popup_show)
+        (requireActivity() as ProfileActivity).profileLayout.addView(writePopupView)
+        val anim = AnimationUtils.loadAnimation(requireContext(), R.anim.popup_show)
         writePopupView.startAnimation(anim)
     }
 
     private fun removePopupView(v: View) {
-        profileLayout.removeView(v)
-        val anim = AnimationUtils.loadAnimation(this, R.anim.popup_show)
+        (requireActivity() as ProfileActivity).profileLayout.removeView(v)
+        val anim = AnimationUtils.loadAnimation(requireContext(), R.anim.popup_show)
         v.startAnimation(anim)
-        this.currentFocus?.let { view ->
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        requireActivity().currentFocus?.let { view ->
+            val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             imm?.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
@@ -146,14 +152,14 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
     fun uploadRequest(v: View) {
         val prayerText = prayerEditText.text.toString()
         if (prayerText.trim().isEmpty()) {
-            val toast = Toast(this)
+            val toast = Toast(requireContext())
             toast.setText("You can not submit empty prayers.")
             toast.duration = Toast.LENGTH_SHORT
             toast.show()
             return
         }
         if (prayerText.count() > 500) {
-            val toast = Toast(this)
+            val toast = Toast(requireContext())
             toast.setText("Please keep your prayer length below 15 lines.")
             toast.duration = Toast.LENGTH_SHORT
             toast.show()
@@ -182,18 +188,13 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         addPrayerToAdapter(prayer)
     }
 
-    fun exit(v: View) {
-        //startActivity(Intent(this, MainActivity::class.java))
-        finish()
-    }
-
     // onClick method for prayers in Profile to show full prayer
     override fun onClick(v: View) {
         prayerText.verticalScrollbarPosition = 0
         prayerText.text = v.findViewById<TextView>(R.id.prayer_text).text
         prayerText.movementMethod = ScrollingMovementMethod()
         prayCount.text = v.findViewById<TextView>(R.id.pray_count).text
-        readPopupWindow.showAtLocation(profileLayout, Gravity.CENTER, 0, 0)
+        readPopupWindow.showAtLocation((requireActivity() as ProfileActivity).profileLayout, Gravity.CENTER, 0, 0)
     }
 
     fun savePrayer(v: View) {
@@ -231,7 +232,4 @@ class ProfileActivity : AppCompatActivity(), OnClickListener {
         }
     }
 
-    companion object {
-        val LOG = Logger.getLogger(ProfileActivity::class.java.name)
-    }
 }

@@ -1,26 +1,20 @@
 package com.onlysaints.prayforme
 
-import android.app.ActionBar
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
-import android.text.method.ScrollingMovementMethod
-import android.view.Gravity
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.PopupWindow
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.res.ResourcesCompat
 import com.onlysaints.prayforme.classes.Prayer
 import com.onlysaints.prayforme.database.Database
-import com.onlysaints.prayforme.listeners.ButtonTouchListener
 import com.onlysaints.prayforme.listeners.PrayerStackListener
+import com.onlysaints.prayforme.profile.ProfileActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
     // 1 to save prayer, 0 not to
     var savePrayer = 0
-    lateinit var hearts: List<Drawable?>
+    lateinit var hearts: List<Int>
 
     // views
     lateinit var mainLayout: ConstraintLayout
@@ -43,13 +37,14 @@ class MainActivity : AppCompatActivity() {
     lateinit var rightSign: ConstraintLayout
     lateinit var savePrayerButton: ImageView
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         hearts = listOf(
-            ResourcesCompat.getDrawable(resources, R.drawable.empty_heart, null),
-            ResourcesCompat.getDrawable(resources, R.drawable.heart, null)
+            R.drawable.empty_heart,
+            R.drawable.heart
         )
 
         mainLayout = findViewById(R.id.main_layout)
@@ -60,12 +55,8 @@ class MainActivity : AppCompatActivity() {
         rightSign = findViewById(R.id.right_sign)
         savePrayerButton = findViewById(R.id.save_prayer_button)
 
-        val requestPrayersButton = findViewById<ImageView>(R.id.request_prayers_button)
-
         // set onTouchListeners
         prayerStackListener = PrayerStackListener(this)
-        requestPrayersButton.setOnTouchListener(ButtonTouchListener(true))
-        savePrayerButton.setOnTouchListener(ButtonTouchListener(true))
         // only needs to be initialized for one card, because the listener switches
         prayerCard1.setOnTouchListener(prayerStackListener)
 
@@ -79,7 +70,7 @@ class MainActivity : AppCompatActivity() {
 
     fun savePrayer(v: View) {
         savePrayer = 1 - savePrayer
-        (v as ImageView).setImageDrawable(hearts[savePrayer])
+        (v as ImageView).setBackgroundResource(hearts[savePrayer])
     }
 
     private fun removePopupView(v: View) {

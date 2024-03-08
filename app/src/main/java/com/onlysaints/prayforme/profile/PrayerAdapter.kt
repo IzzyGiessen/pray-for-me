@@ -1,8 +1,6 @@
-package com.onlysaints.prayforme
+package com.onlysaints.prayforme.profile
 
 import android.content.Context
-import android.os.Parcel
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
@@ -13,13 +11,14 @@ import android.widget.TextView
 import android.widget.ViewSwitcher
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.onlysaints.prayforme.R
 import com.onlysaints.prayforme.classes.Prayer
 import com.onlysaints.prayforme.database.Database
 import com.onlysaints.prayforme.listeners.ButtonTouchListener
-import java.io.Serializable
 
 class PrayerAdapter(private val context: Context, val prayers: ArrayList<Prayer>,
-                    private val onClickListener: OnClickListener, private val profileOnFinish: ProfileOnFinish)
+                    private val onClickListener: OnClickListener, private val profileOnFinish: ProfileOnFinish
+)
         : RecyclerView.Adapter<PrayerAdapter.ViewHolder>() {
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private val db: Database = Database()
@@ -68,11 +67,10 @@ class PrayerAdapter(private val context: Context, val prayers: ArrayList<Prayer>
             removeButton = view.findViewById(R.id.remove_button)
             switcher = view.findViewById(R.id.prayer_card_switcher)
 
-            view.setOnTouchListener(ButtonTouchListener())
+            view.setOnTouchListener(ButtonTouchListener(ButtonTouchListener.ClickType.HOLD))
             view.setOnLongClickListener(::onLongClick)
             view.setOnClickListener(onClickListener)
             // warning is for the blind
-            removeButton.setOnTouchListener(ButtonTouchListener())
             removeButton.setOnLongClickListener(::onLongClick)
             removeButton.setOnClickListener(createRemoveOnClick(this))
         }

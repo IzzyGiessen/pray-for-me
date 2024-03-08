@@ -1,22 +1,19 @@
-package com.onlysaints.prayforme
+package com.onlysaints.prayforme.profile
 
-import android.view.View
 import com.google.firebase.database.DataSnapshot
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.onlysaints.prayforme.classes.Prayer
 
-class ProfileOnFinish(private val act: ProfileActivity) {
+class ProfileOnFinish(private val frag: MyPrayersFragment) {
     fun removePrayer(holder: PrayerAdapter.ViewHolder) {
         val prayerId = holder.prayerId
         if (prayerId == null) return; // TODO: do something
-        act.ls.removePrayer(prayerId)
+        frag.ls.removePrayer(prayerId)
         holder.remove()
     }
 
     fun addCountToPrayer(prayer: Prayer): (DataSnapshot) -> Unit = { count ->
         val newPrayer = prayer.changeCount(count.value.toString().let { if(it == "null") 0 else it.toInt()})
-        act.addPrayerToAdapter(newPrayer)
+        frag.addPrayerToAdapter(newPrayer)
     }
 
 }

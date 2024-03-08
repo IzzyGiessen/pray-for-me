@@ -42,11 +42,12 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <ImageButton
+        <com.onlysaints.prayforme.views.TouchImageButton
             android:id="@+id/remove_button"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_gravity="center"
+            app:click_type="HOLD"
             android:background="@drawable/profile_icon" />
 
     </ViewSwitcher>

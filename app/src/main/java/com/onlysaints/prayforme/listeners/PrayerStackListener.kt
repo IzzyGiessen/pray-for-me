@@ -1,5 +1,6 @@
 package com.onlysaints.prayforme.listeners
 
+import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.opengl.Visibility
 import android.view.MotionEvent
@@ -203,6 +204,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
             .start()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun switchCards(view: View) {
         view.setOnTouchListener(null)
         toOrigin(view)
@@ -223,7 +225,7 @@ class PrayerStackListener(val act: MainActivity) : View.OnTouchListener {
             nextCard.addView(this)
             animate().scaleY(0f).scaleX(0f).setDuration(0).start()
             animate().scaleY(1f).scaleX(1f).setDuration(100).start()
-            this.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.empty_heart, null))
+            this.setBackgroundResource(R.drawable.empty_heart)
             val parent = this.parent as ConstraintLayout
             parent.removeView(this)
             nextCard.addView(this)
